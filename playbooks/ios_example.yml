@@ -1,0 +1,32 @@
+---
+- hosts: ios_devices
+  gather_facts: no
+  connection: local
+
+  vars_prompt:
+  - name: "username"
+    prompt: "username"
+    private: no
+  - name: "password"
+    prompt: "password"
+
+  tasks:
+
+  - name: SYS | Define provider
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+
+
+  - name: IOS | show version
+    ios_command:
+      provider: "{{ provider }}"
+      commands:
+        - show run
+    register: version
+
+  - debug: msg="{{ version.stdout_lines }}"
+
+  - local_action: copy content={{ version.stdout_lines }} dest=~/ansible_out
